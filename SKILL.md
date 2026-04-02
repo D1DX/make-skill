@@ -1,5 +1,5 @@
 ---
-name: make-api
+name: make
 description: Make.com API — scenarios, blueprints, connections, webhooks, data stores, scenario execution, blueprint JSON structure, and Make-to-n8n migration patterns. Auto-triggers on Make.com, Make API, scenario management, and automation migration tasks.
 disable-model-invocation: false
 user-invocable: true
