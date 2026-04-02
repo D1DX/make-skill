@@ -362,8 +362,7 @@ curl -s "$BASE/scenarios-foldertree?teamId=YOUR_TEAM_ID" \
 4. **Pull before edit** — always fetch the current blueprint before modifying locally. The live scenario may have been edited in the UI.
 5. **Push doesn't activate** — pushing a blueprint doesn't activate the scenario. Activate separately with `/start`.
 6. **Router `:else:` toggle** — fallback route requires `:else:` ON in the Make UI. If it turns off, all requests fall through to the last route silently.
-7. **Webhook test vs production URL** — Make shows two URLs per webhook. External systems must use the production URL, not the test URL.
-8. **Rate limits** — API has rate limits per team. Bulk operations should add delays.
+7. **Rate limits** — API has rate limits per team. Bulk operations should add delays.
 9. **Scenario scheduling** — `indefinitely` means "run continuously", `once` runs once. Webhook-triggered scenarios don't need a scheduling interval.
 10. **Blueprint module IDs** — IDs are local to the blueprint (1, 2, 3...). References like `{{1.body}}` use these IDs.
 11. **Data store size limit** — free plan: 10MB. Check quota before bulk writes.
