@@ -24,6 +24,12 @@ A complete reference for the Make.com API and blueprint management — covering 
 | Make-to-n8n Migration | Module mapping table, expression syntax translation table |
 | Critical Gotchas | Blueprint-as-string encoding, zone prefix requirement, connection ID portability, pull-before-edit, activation after push |
 
+## Recommended: Use with the MCP Server
+
+For the best experience, pair this skill with **[make-mcp](https://github.com/D1DX/make-mcp)** — the unofficial MCP server for Make.com built by D1DX. It exposes 200+ modules and auto-healing blueprints directly to your AI agent, so you can read and push scenarios without leaving your editor.
+
+The MCP is configured for zone **`eu1`** by default. If your Make.com account is on a different zone (e.g. `us1`, `eu2`), update the `MAKE_ZONE` environment variable to your zone's full hostname (e.g. `us1.make.com`).
+
 ## Install
 
 ### Claude Code
