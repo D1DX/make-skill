@@ -29,7 +29,7 @@ BASE="https://eu1.make.com/api/v2"
 ?teamId=YOUR_TEAM_ID
 ```
 
-**MCP:** Use [D1DX/make-mcp](https://github.com/D1DX/make-mcp) for read and write operations — it handles auth automatically.
+**MCP:** Use the official Make.com cloud MCP at `https://eu1.make.com/mcp/stateless` (Streamable HTTP, Bearer-header auth). Replace `eu1` with your zone (`eu2`/`us1`/`us2`). The legacy `D1DX/make-mcp` stdio fork is retired as of 2026-05-08.
 
 ---
 

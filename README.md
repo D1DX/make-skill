@@ -24,11 +24,27 @@ A complete reference for the Make.com API and blueprint management — covering 
 | Make-to-n8n Migration | Module mapping table, expression syntax translation table |
 | Critical Gotchas | Blueprint-as-string encoding, zone prefix requirement, connection ID portability, pull-before-edit, activation after push |
 
-## Recommended: Use with the MCP Server
+## Recommended: Use with the Make.com Cloud MCP
 
-For the best experience, pair this skill with **[make-mcp](https://github.com/D1DX/make-mcp)** — the unofficial MCP server for Make.com built by D1DX. It exposes 200+ modules and auto-healing blueprints directly to your AI agent, so you can read and push scenarios without leaving your editor.
+For the best experience, pair this skill with the **official Make.com cloud MCP** at `https://eu1.make.com/mcp/stateless` (or `eu2`/`us1`/`us2` for your zone). It uses Streamable HTTP transport with Bearer-header auth, runs in Make's infrastructure, and exposes 200+ modules and scenarios directly to your AI agent — no local node process to install or orphan.
 
-The MCP is configured for zone **`eu1`** by default. If your Make.com account is on a different zone (e.g. `us1`, `eu2`), update the `MAKE_ZONE` environment variable to your zone's full hostname (e.g. `us1.make.com`).
+Example Claude Code config (`.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "make": {
+      "type": "http",
+      "url": "https://eu1.make.com/mcp/stateless",
+      "headers": {
+        "Authorization": "Bearer YOUR_MAKE_API_KEY"
+      }
+    }
+  }
+}
+```
+
+> **Note on the legacy stdio fork.** D1DX previously maintained `github:D1DX/make-mcp` — a Node-based stdio MCP server. It is **retired as of 2026-05-08** for unfixable orphan-storm failure modes on macOS Sequoia (a v1.4.2 watchdog gap reproduced under Codex). Use the cloud MCP above instead. Recovery for any consumer still running the fork: `pkill -9 -f make-mcp-server`.
 
 ## Install
 
