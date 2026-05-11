@@ -317,7 +317,73 @@ Status values: `success`, `warning`, `error`.
 
 ---
 
-## 8. Folders
+## 8. Incomplete Executions (DLQ)
+
+When a scenario errors with **Store Incomplete Executions** enabled (or hits a `Break` directive), failed bundles park in the scenario's DLQ. Two paths to clear them.
+
+### UI deep-link
+
+Verified pattern (team-scoped + tab suffix):
+
+```text
+https://{zone}.make.com/{teamId}/scenarios/{scenarioId}/dlq
+```
+
+Sibling tab forms: `/scenarios/{id}` (Diagram), `/scenarios/{id}/edit`, `/scenarios/{id}/history`, `/scenarios/{id}/dlq`. The `{teamId}` segment is **mandatory** — un-scoped `/scenarios/{id}` 404s in the browser. Token / browser-session auth determines which teams the URL resolves under.
+
+URL guesses cannot be verified from the CLI — Make's SPA returns 404 for every unauthenticated probe (defense, not actual missing route). Ask the operator to paste the URL from a logged-in browser, or use the API.
+
+### API — token auth (per public docs)
+
+Per the [Make developer docs — incomplete executions](https://developers.make.com/api-documentation/api-reference/incomplete-executions):
+
+```bash
+# Delete specific bundles
+curl -X DELETE "$BASE/dlqs?scenarioId=SCENARIO_ID&confirmed=true" \
+  -H "Authorization: Token $MAKE_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"ids":["dlqId1","dlqId2"]}'
+
+# Delete every DLQ entry for the scenario
+curl -X DELETE "$BASE/dlqs?scenarioId=SCENARIO_ID&confirmed=true" \
+  -H "Authorization: Token $MAKE_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"all":true,"ids":[],"exceptIds":[]}'
+
+# Keep some, delete the rest
+curl -X DELETE "$BASE/dlqs?scenarioId=SCENARIO_ID&confirmed=true" \
+  -H "Authorization: Token $MAKE_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"all":true,"ids":[],"exceptIds":["keepThisDlqId"]}'
+```
+
+The deprecated single-bundle form `DELETE /dlqs/{dlqId}` still works but prefer the batch form above.
+
+### API — browser session cookie auth (internal API)
+
+The same endpoint also accepts the user's browser session — useful when the public-API token is unavailable or scope-limited. The Make web app calls `DELETE /api/v2/dlqs?scenarioId={id}&confirmed=true` directly from the operator's session. Required headers (extracted from a logged-in browser):
+
+```bash
+curl -X DELETE 'https://{zone}.make.com/api/v2/dlqs?scenarioId=SCENARIO_ID&confirmed=true' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'content-type: application/json' \
+  -H 'imt-web-zone: production' \
+  -H 'origin: https://{zone}.make.com' \
+  -H 'referer: https://{zone}.make.com/{teamId}/scenarios/{scenarioId}/dlq' \
+  -b 'sid=<session cookie>; XSRF-TOKEN=<csrf token>; userId=<userId cookie>; ...' \
+  --data-raw '{"all":true,"ids":[],"exceptIds":[]}'
+```
+
+Cookie extraction: use the [`chrome-cookies`](https://github.com/D1DX/chrome-cookies-skill) skill (or Chrome DevTools → Network → copy as cURL). **Never paste live session cookies into chat, commit messages, docs, or task records** — they grant full account access for the cookie lifetime. Treat extracted cookies as Tier-0 secrets.
+
+Auth method choice:
+
+- **Token auth** — preferred for scripts, cron, n8n flows, and team-shared automation. Stable. Mints via Make UI → Profile → API.
+- **Cookie auth** — when the token doesn't carry the needed scope, or for one-off operator-driven cleanup. Cookie expires when the browser session ends.
+
+---
+
+## 9. Folders
 
 ```bash
 # List folders
@@ -327,7 +393,7 @@ curl -s "$BASE/scenarios-foldertree?teamId=YOUR_TEAM_ID" \
 
 ---
 
-## 9. Make-to-n8n Migration Mapping
+## 10. Make-to-n8n Migration Mapping
 
 | Make Module | n8n Equivalent | Notes |
 |-------------|---------------|-------|
@@ -354,7 +420,7 @@ curl -s "$BASE/scenarios-foldertree?teamId=YOUR_TEAM_ID" \
 
 ---
 
-## 10. Critical Gotchas
+## 11. Critical Gotchas
 
 1. **Blueprint is a string** — when pushing via API, blueprint must be JSON-encoded as a string value, not a raw object. Use the `jq -n --arg bp` pattern.
 2. **Zone prefix required** — calls to `make.com` without the correct zone prefix (e.g. `eu1`) return 404. Always use the full zoned base URL.
